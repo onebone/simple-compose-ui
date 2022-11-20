@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
 val GraphVerticalPadding = 32.dp
+val ValueTextMargin = 6.dp
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
@@ -46,6 +47,7 @@ fun AnimatedLineGraph(
 	val midValue = (maxValue + minValue) / 2
 
 	val graphVerticalPadding = with(LocalDensity.current) { GraphVerticalPadding.toPx() * 2 }
+	val valueTextMargin = with(LocalDensity.current) { ValueTextMargin.toPx() }
 
 	val textMeasurer = rememberTextMeasurer()
 	val fontSize = with(LocalDensity.current) { (GraphVerticalPadding - 12.dp).toSp() }
@@ -54,7 +56,7 @@ fun AnimatedLineGraph(
 		val scale = if (maxValue == minValue)
 			1f
 		else
-			size.height / (maxValue - minValue) * (size.height - graphVerticalPadding) / size.height
+			(size.height - graphVerticalPadding) / (maxValue - minValue)
 
 		fun getXByIndex(index: Int): Float {
 			val widthPerIndex = size.width / data.list.size
@@ -108,9 +110,9 @@ fun AnimatedLineGraph(
 				y = getYByValue(entry.value) + when (adjustedAnchor) {
 					ValueTextAnchor.LeftBottom,
 					ValueTextAnchor.RightBottom,
-					ValueTextAnchor.Bottom -> 0f
+					ValueTextAnchor.Bottom -> valueTextMargin
 
-					ValueTextAnchor.Top -> -result.size.height * 1.2f
+					ValueTextAnchor.Top -> -result.size.height - valueTextMargin
 				}
 			)
 
