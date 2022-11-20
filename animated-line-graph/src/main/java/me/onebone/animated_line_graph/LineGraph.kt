@@ -48,7 +48,7 @@ fun AnimatedLineGraph(
 	val graphVerticalPadding = with(LocalDensity.current) { GraphVerticalPadding.toPx() * 2 }
 
 	val textMeasurer = rememberTextMeasurer()
-	val fontSize = with(LocalDensity.current) { (GraphVerticalPadding - 8.dp).toSp() }
+	val fontSize = with(LocalDensity.current) { (GraphVerticalPadding - 12.dp).toSp() }
 
 	Canvas(modifier = modifier) {
 		val scale = if (maxValue == minValue)
@@ -95,12 +95,61 @@ fun AnimatedLineGraph(
 				style = TextStyle(fontSize = fontSize)
 			)
 
+			val anchor = getAnchorByEntry(data.list.getOrNull(index - 1), entry, data.list.getOrNull(index + 1))
+			val adjustedAnchor = if (negate) anchor.negate() else anchor
+
+			val topLeft = Offset(
+				x = getXByIndex(index) + when (adjustedAnchor) {
+					ValueTextAnchor.LeftBottom -> -result.size.width
+					ValueTextAnchor.Top,
+					ValueTextAnchor.Bottom -> -result.size.width / 2
+					ValueTextAnchor.RightBottom -> 0
+				},
+				y = getYByValue(entry.value) + when (adjustedAnchor) {
+					ValueTextAnchor.LeftBottom,
+					ValueTextAnchor.RightBottom,
+					ValueTextAnchor.Bottom -> 0f
+
+					ValueTextAnchor.Top -> -result.size.height * 1.2f
+				}
+			)
+
 			drawText(
 				textLayoutResult = result,
-				topLeft = Offset(getXByIndex(index) - result.size.width / 2, getYByValue(entry.value)),
+				topLeft = topLeft,
 				color = Color.Black,
 				alpha = factor
 			)
 		}
+	}
+}
+
+private enum class ValueTextAnchor {
+	LeftBottom, Top, RightBottom, Bottom;
+
+	fun negate(): ValueTextAnchor = when (this) {
+		Top -> Bottom
+		Bottom -> Top
+        LeftBottom -> RightBottom
+		RightBottom -> LeftBottom
+	}
+}
+
+private fun getAnchorByEntry(prev: GraphEntry?, current: GraphEntry, next: GraphEntry?): ValueTextAnchor {
+	val wasIncreasing = if (prev != null) prev.value < current.value else false
+	val wasDecreasing = if (prev != null) prev.value > current.value else false
+	val isIncreasing = if (next != null) current.value < next.value else false
+	val isDecreasing = if (next != null) current.value > next.value else false
+
+	return when {
+		wasIncreasing && isIncreasing -> ValueTextAnchor.RightBottom
+		wasIncreasing && isDecreasing -> ValueTextAnchor.Top
+		wasDecreasing && isIncreasing -> ValueTextAnchor.Bottom
+		wasDecreasing && isDecreasing -> ValueTextAnchor.LeftBottom
+		prev == null && isIncreasing -> ValueTextAnchor.Bottom
+		prev == null && isDecreasing -> ValueTextAnchor.Top
+		wasIncreasing && next == null -> ValueTextAnchor.Top
+		wasDecreasing && next == null -> ValueTextAnchor.Bottom
+		else -> ValueTextAnchor.Bottom
 	}
 }
