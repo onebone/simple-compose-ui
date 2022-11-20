@@ -45,12 +45,13 @@ fun SampleGraph() {
 			GraphEntry(1.2f),
 			GraphEntry(5.4f),
 			GraphEntry(1.2f),
-			GraphEntry(1.6f),
+			GraphEntry(1.7f)
 		))
 	}
 
 	AnimatedLineGraph(
 		modifier = Modifier.fillMaxWidth().aspectRatio(2f).background(Color.Green),
+		negate = true,
 		data = data
 	)
 }
