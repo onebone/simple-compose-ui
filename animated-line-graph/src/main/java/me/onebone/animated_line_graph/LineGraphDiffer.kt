@@ -1,6 +1,7 @@
 package me.onebone.animated_line_graph
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalDensity
@@ -54,6 +55,10 @@ internal class LineGraphDiffer {
 				}
 			}
         }
+
+		DisposableEffect(composition) {
+			onDispose { composition.dispose() }
+		}
 	}
 
 	private fun getComposition(compositionContext: CompositionContext): Composition {
@@ -127,8 +132,8 @@ internal fun LineGraphLeaf(
 	ComposeNode<LineGraphNode.Leaf, LineGraphApplier>(
 		factory = { LineGraphNode.Leaf(x, y) },
         update = {
-			set(x) { scope.launch { this@set.x.animateTo(it) } }
-	        set(y) { scope.launch { this@set.y.animateTo(it) } }
+			set(x) { scope.launch { this@set.x.animateTo(it, tween(2000)) } }
+			set(y) { scope.launch { this@set.y.animateTo(it, tween(2000)) } }
         }
 	)
 }
