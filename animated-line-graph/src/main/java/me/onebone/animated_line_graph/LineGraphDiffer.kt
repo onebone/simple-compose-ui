@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 
 internal class LineGraphDiffer {
 	private var composition: Composition? = null
+	val root = LineGraphNode.Parent()
 
 	@Composable
 	fun Render(
@@ -59,7 +60,7 @@ internal class LineGraphDiffer {
 		val existing = composition
 		return if (existing == null || existing.isDisposed) {
 			Composition(
-				LineGraphApplier(LineGraphNode.Parent),
+				LineGraphApplier(root),
 				compositionContext
 			).also { composition = it }
         } else {
@@ -69,7 +70,7 @@ internal class LineGraphDiffer {
 }
 
 internal sealed class LineGraphNode {
-	object Parent : LineGraphNode() {
+	class Parent : LineGraphNode() {
 		var children = mutableStateListOf<LineGraphNode>()
 	}
 
@@ -79,7 +80,7 @@ internal sealed class LineGraphNode {
 	}
 }
 
-internal class LineGraphApplier(commander: LineGraphNode) : AbstractApplier<LineGraphNode>(commander) {
+internal class LineGraphApplier(root: LineGraphNode.Parent) : AbstractApplier<LineGraphNode>(root) {
 	private val parent get() = root as LineGraphNode.Parent
 
 	override fun insertBottomUp(index: Int, instance: LineGraphNode) {
@@ -114,17 +115,6 @@ internal class LineGraphApplier(commander: LineGraphNode) : AbstractApplier<Line
 	AnnotationTarget.TYPE_PARAMETER
 )
 internal annotation class LineGraphComposable
-
-@LineGraphComposable
-@Composable
-internal fun LineGraphParent(content: @Composable @LineGraphComposable () -> Unit) {
-	ComposeNode<LineGraphNode.Parent, LineGraphApplier>(
-		factory = { LineGraphNode.Parent },
-		update = { }
-	) {
-		content()
-	}
-}
 
 @LineGraphComposable
 @Composable

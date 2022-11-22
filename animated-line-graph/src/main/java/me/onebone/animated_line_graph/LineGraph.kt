@@ -57,7 +57,7 @@ fun AnimatedLineGraph(
 		modifier = modifier
 			.onSizeChanged { size = it }
 			.drawBehind {
-				val children = LineGraphNode.Parent.children.map { it as LineGraphNode.Leaf }
+				val children = differ.root.children.map { it as LineGraphNode.Leaf }
 
 				children.forEachIndexed { index, entry ->
 					if (index > 0) {
