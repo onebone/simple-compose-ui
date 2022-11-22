@@ -9,14 +9,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import kotlinx.coroutines.delay
 import me.onebone.animated_line_graph.AnimatedLineGraph
 import me.onebone.animated_line_graph.GraphEntry
 import me.onebone.animated_line_graph.LineGraphData
 import me.onebone.simpleui.ui.theme.SimpleuiTheme
+import kotlin.math.floor
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,20 +39,35 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun SampleGraph() {
-	val data = remember {
-		LineGraphData(listOf(
-			GraphEntry(4.3f),
-			GraphEntry(2.5f),
-			GraphEntry(4.6f),
-			GraphEntry(1.2f),
-			GraphEntry(5.4f),
-			GraphEntry(1.2f),
-			GraphEntry(1.7f)
-		))
+	var data by remember {
+		mutableStateOf(
+			LineGraphData(listOf(
+				GraphEntry(0, 4.3f),
+				GraphEntry(1, 2.5f),
+				GraphEntry(2, 4.6f),
+				GraphEntry(3, 1.2f),
+				GraphEntry(4, 5.4f),
+				GraphEntry(5, 1.2f),
+				GraphEntry(6, 1.7f)
+			))
+		)
+	}
+
+	LaunchedEffect(Unit) {
+		while (true) {
+			delay(3000)
+
+			data = LineGraphData(List(Random.nextInt(5, 10)) {
+				GraphEntry(it, floor((Random.nextFloat() * 8 + 1) * 10) / 10)
+			})
+		}
 	}
 
 	AnimatedLineGraph(
-		modifier = Modifier.fillMaxWidth().aspectRatio(2f).background(Color.Green),
+		modifier = Modifier
+			.fillMaxWidth()
+			.aspectRatio(2f)
+			.background(Color.Green),
 		negate = true,
 		data = data
 	)

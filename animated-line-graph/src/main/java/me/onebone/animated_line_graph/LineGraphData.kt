@@ -5,5 +5,6 @@ data class LineGraphData(
 )
 
 data class GraphEntry(
+	val key: Any,
 	val value: Float
 )
